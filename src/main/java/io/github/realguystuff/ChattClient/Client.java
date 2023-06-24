@@ -1,4 +1,24 @@
-package io.github.realguystuff.ChattServer;
+/*
+ * ChattClient: A privacy-focused chat client.
+ * Copyright (C) 2023  realguystuff
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Email: realguybackup@gmail.com
+ */
+
+package io.github.realguystuff.ChattClient;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -8,7 +28,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -113,15 +132,23 @@ public class Client {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         System.out.println("Running client version "+version);
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter your username:");
+        System.out.print("Enter your username: ");
         String username = sc.nextLine();
-        System.out.println("Enter your password:");
+        System.out.println();
+        System.out.print("Enter your password: ");
         String password = sc.nextLine();
+        System.out.println();
 
         // Hash the password using SHA-512 algorithm
         MessageDigest md = MessageDigest.getInstance("SHA-512");
-        String hashedPasswordStr = Arrays.toString(md.digest(password.getBytes()));
+        byte[] hashedPassword = md.digest(password.getBytes());
 
+        // Convert the hashed password to a hexadecimal representation
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashedPassword) {
+            sb.append(String.format("%02x", b));
+        }
+        String hashedPasswordStr = sb.toString();
         // Perform the database check using the username and hashed password
         boolean isValidUser = checkCredentials(username, hashedPasswordStr);
 
