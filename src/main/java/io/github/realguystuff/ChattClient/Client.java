@@ -21,13 +21,13 @@
 package io.github.realguystuff.ChattClient;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -36,7 +36,9 @@ public class Client {
     private BufferedReader buffReader;
     private BufferedWriter buffWriter;
     private final String username;
+    private static String ip;
     private static final String version = "1.0.0";
+
 
     public Client(Socket socket, String username) {
         try {
@@ -62,26 +64,28 @@ public class Client {
             while (socket.isConnected()) {
                 String messageToSend = sc.nextLine();
                 if (Objects.equals(messageToSend, "/help") || Objects.equals(messageToSend, "/?")) {
-                    System.out.println("[CLIENT]: Here are a list of commands and what they do:");
-                    System.out.println("[CLIENT]: ---------------------------------------------");
-                    System.out.println("[CLIENT]: | /help     | Gives this list. Aliases: /?  |");
-                    System.out.println("[CLIENT]: | /ip       | Tells you what IP are you on. |");
-                    System.out.println("[CLIENT]: | /whoami   | Tells you your username.      |");
-                    System.out.println("[CLIENT]: | /rickroll | Gives rickroll links.         |");
-                    System.out.println("[CLIENT]: | /version  | Gives the current version.    |");
-                    System.out.println("[CLIENT]: ---------------------------------------------");
+                    System.out.println("client: Here are a list of commands and what they do:");
+                    System.out.println("client: ---------------------------------------------");
+                    System.out.println("client: | /help     | Gives this list. Aliases: /?  |");
+                    System.out.println("client: | /ip       | Tells you what IP are you on. |");
+                    System.out.println("client: | /whoami   | Tells you your username.      |");
+                    System.out.println("client: | /rickroll | Gives rickroll links.         |");
+                    System.out.println("client: | /version  | Gives the current version.    |");
+                    System.out.println("client: ---------------------------------------------");
                 } else if (Objects.equals(messageToSend, "/whoami")) {
-                    System.out.println("[CLIENT]: You are \""+username+"\".");
+                    System.out.println("client: You are \""+username+"\".");
                 } else if (Objects.equals(messageToSend, "/rickroll")) {
-                    System.out.println("[CLIENT]: Use it wisely (don't use this if they're smart; they can also use /rickroll):");
-                    System.out.println("[CLIENT]: Official Music Video: https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-                    System.out.println("[CLIENT]: Different link #1: https://www.youtube.com/watch?v=iik25wqIuFo");
-                    System.out.println("[CLIENT]: Different link #2: https://www.youtube.com/watch?v=xvFZjo5PgG0");
-                    System.out.println("[CLIENT]: Different link #3: ttps://www.youtube.com/watch?v=8ybW48rKBME");
-                    System.out.println("[CLIENT]: Different link #4: https://www.youtube.com/watch?v=p7YXXieghto");
-                    System.out.println("[CLIENT]: Different link #5: https://www.youtube.com/watch?v=QB7ACr7pUuE");
+                    System.out.println("client: Use it wisely (don't use this if they're smart; they can also use /rickroll):");
+                    System.out.println("client: Official Music Video: https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                    System.out.println("client: Different link #1: https://www.youtube.com/watch?v=iik25wqIuFo");
+                    System.out.println("client: Different link #2: https://www.youtube.com/watch?v=xvFZjo5PgG0");
+                    System.out.println("client: Different link #3: ttps://www.youtube.com/watch?v=8ybW48rKBME");
+                    System.out.println("client: Different link #4: https://www.youtube.com/watch?v=p7YXXieghto");
+                    System.out.println("client: Different link #5: https://www.youtube.com/watch?v=QB7ACr7pUuE");
                 } else if (Objects.equals(messageToSend, "/version")) {
-                    System.out.println("[CLIENT]: You are running client version "+version);
+                    System.out.println("client: You are running client version "+version);
+                } else if (Objects.equals(messageToSend, "/ip")) {
+                    System.out.println("client: You are on "+ip+":5000");
                 } else {
                     buffWriter.write(username + ": " + messageToSend);
                     buffWriter.newLine();
@@ -129,15 +133,22 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, SQLException {
+        Console console = System.console();
+        if (console == null) {
+            System.err.println("No console available. Exiting...");
+            System.exit(1);
+        }
         System.out.println("Running client version "+version);
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter your username: ");
-        String username = sc.nextLine();
-        System.out.println();
+        String username = sc.nextLine().toLowerCase();
         System.out.print("Enter your password: ");
-        String password = sc.nextLine();
-        System.out.println();
+        char[] passwordChars = console.readPassword();
+        // Convert the password to a String
+        String password = new String(passwordChars);
+
+        System.out.println("Checking password...");
 
         // Hash the password using SHA-512 algorithm
         MessageDigest md = MessageDigest.getInstance("SHA-512");
@@ -149,17 +160,29 @@ public class Client {
             sb.append(String.format("%02x", b));
         }
         String hashedPasswordStr = sb.toString();
+        Arrays.fill(passwordChars, ' ');
+        System.out.println("Authenticating (this may take a while)...");
         // Perform the database check using the username and hashed password
-        boolean isValidUser = checkCredentials(username, hashedPasswordStr);
+        Database database = new Database();
+        boolean isValidUser = database.call("SELECT * FROM authenticated WHERE username = '" + username + "' AND pw = '" + hashedPasswordStr + "'").next();
 
+        database.close();
         if (isValidUser) {
             System.out.println("Authentication successful!");
-            System.out.println("Enter the IP address you want to join (do not add :5000 to the end of the IP):");
-            String ip = sc.nextLine();
+            System.out.println("Enter the IP address you want to join (do not add :5000 to the end of the IP): ");
+            System.out.print("> ");
+            ip = sc.nextLine();
 
             try {
                 System.out.println("Connecting you to " + ip + ":5000 as " + username + "...");
-                Socket socket = new Socket(ip, 5000);
+                Socket socket;
+                try {
+                    socket = new Socket(ip, 5000);
+                } catch (ConnectException e) {
+                    System.out.println("Error CL7:");
+                    System.out.println(e.getMessage());
+                    return;
+                }
                 Client client = new Client(socket, username);
                 System.out.println("Connection successful!");
                 client.readMessage();
@@ -173,12 +196,7 @@ public class Client {
         } else {
             System.out.println("Error CL6: AuthenticationException");
             System.out.println("hint: CL6 usually means that you have typed in your username or password wrong, or the username doesn't exist in the database (try signing UP on the website)");
+            main(args);
         }
-    }
-
-    public static boolean checkCredentials(String username, String hashedPassword) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Database database = new Database();
-        ResultSet resultSet = database.call("SELECT * FROM users WHERE username = '" + username + "' AND pw = '" + hashedPassword + "'");
-        return resultSet.next();
     }
 }

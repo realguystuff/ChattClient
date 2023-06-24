@@ -4,7 +4,8 @@
 Don't want to get tracked, spied, or even banned on the entire platform for breaking the platform's rules?\
 We've got you covered.
 
-ChattClient is a chat client that joins ChattServers. No need for being extra careful for privacy-- the Chatt Platform will never, ever, spy up on you.
+ChattClient is a chat client that joins ChattServers.
+No need for being extra careful for privacy-- the Chatt Platform will never, ever, spy up on you.
 
 ## Table of contents
 1. [Disclaimer](#Disclaimer)
@@ -36,11 +37,12 @@ here is a step-by-step tutorial on how to use the client yourself:
 2. Download `[VERSION].jar` from releases.
 3. Download the launcher.
 4. Open the launcher, then close it.
-5. Create a folder in the `versions` directory. The version name of the client MUST be the same as the folder name.
+5. Move the `[VERSION].jar` to the newly created `versions` folder
 6. Open the launcher once more, then enter the version number to start the client.
 7. Type your name and put the IP you wish to join.
 8. Enjoy!
 
 ## How to build
 ~~This product uses Gradle Wrapper 8.1.1.~~ This product now uses Maven. Use it to build your own fork!\
-Also, you have my permission to fork my product, as long as it isn't used to invade privacy, is open source and isn't malware.
+Also, you have my permission to fork my product, as long as it isn't used to invade privacy,
+is open source and isn't malware.
