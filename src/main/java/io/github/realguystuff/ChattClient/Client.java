@@ -36,7 +36,7 @@ public class Client {
     private BufferedWriter buffWriter;
     private final String username;
     private static String ip;
-    private static final String version = "1.0.0";
+    private static final String version = "b0.1.0_2";
 
 
     public Client(Socket socket, String username) {
