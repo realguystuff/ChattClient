@@ -21,7 +21,6 @@
 package io.github.realguystuff.ChattClient;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -136,7 +135,7 @@ public class Client {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, SQLException {
         Console console = System.console();
         if (console == null) {
-            System.err.println("No console available. Exiting...");
+            System.err.println("No console available. Error CL7");
             System.exit(1);
         }
         System.out.println("Running client version "+version);
@@ -175,14 +174,7 @@ public class Client {
 
             try {
                 System.out.println("Connecting you to " + ip + ":5000 as " + username + "...");
-                Socket socket;
-                try {
-                    socket = new Socket(ip, 5000);
-                } catch (ConnectException e) {
-                    System.out.println("Error CL7:");
-                    System.out.println(e.getMessage());
-                    return;
-                }
+                Socket socket = new Socket(ip, 5000);
                 Client client = new Client(socket, username);
                 System.out.println("Connection successful!");
                 client.readMessage();
